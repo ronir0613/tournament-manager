@@ -44,11 +44,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/tournaments/*/start").hasRole("ADMIN")
                         .requestMatchers("/api/matches/*/result").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/tournaments").hasRole("ADMIN")
-
+                        .requestMatchers(HttpMethod.GET, "/api/tournaments/**").authenticated()
                         // Shared (authenticated users)
                         .requestMatchers("/api/tournaments/*/bracket").authenticated()
                         .requestMatchers("/api/tournaments/*/leaderboard").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/tournaments/**").authenticated()
+                        
                         .requestMatchers("/api/users").permitAll()
                         .requestMatchers("/api/tournaments/*/participants").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/tournaments/*").hasRole("ADMIN")

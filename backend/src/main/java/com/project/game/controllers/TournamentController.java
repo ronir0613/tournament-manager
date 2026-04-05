@@ -47,6 +47,11 @@ public class TournamentController {
         return tournamentService.getLeaderboard(id);
     }
 
+    @GetMapping("/{id}")
+    public Tournament getTournament(@PathVariable Long id) {
+        return tournamentService.getTournament(id);
+    }
+
     @GetMapping
     public List<Tournament> getAllTournaments() {
         return tournamentService.getAllTournaments();
@@ -67,5 +72,6 @@ public class TournamentController {
             @RequestParam String status) {
         return tournamentService.updateTournamentStatus(id, status);
     }
+    
 
 }

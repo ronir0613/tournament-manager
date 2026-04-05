@@ -18,7 +18,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.io.IOException;
 
 import java.util.Collections;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -55,7 +54,9 @@ public class JwtFilter extends OncePerRequestFilter {
                             Collections.singletonList(
                                     new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
 
-                    auth.setDetails(request);
+                    auth.setDetails(
+                            new org.springframework.security.web.authentication.WebAuthenticationDetailsSource()
+                                    .buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }

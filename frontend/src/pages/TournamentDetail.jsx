@@ -25,10 +25,11 @@ function TournamentDetail() {
   const [bracket, setBracket] = useState({});
   const [leaderboard, setLeaderboard] = useState([]);
 
+  const [tournament, setTournament] = useState(null); // ✅ NEW
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 🔥 NEW: action loading
   const [actionLoading, setActionLoading] = useState(false);
 
   const fetchData = async () => {
@@ -39,10 +40,12 @@ function TournamentDetail() {
       const bracketRes = await API.get(`/api/tournaments/${id}/bracket`);
       const leaderboardRes = await API.get(`/api/tournaments/${id}/leaderboard`);
       const participantsRes = await API.get(`/api/tournaments/${id}/participants`);
+      const tournamentRes = await API.get(`/api/tournaments/${id}`); // ✅ NEW
 
       setBracket(bracketRes.data);
       setLeaderboard(leaderboardRes.data);
       setParticipants(participantsRes.data);
+      setTournament(tournamentRes.data); // ✅ NEW
 
     } catch (err) {
       console.error(err);
@@ -133,15 +136,22 @@ function TournamentDetail() {
           </Button>
         )}
 
-        {role === "ADMIN" && (
+        {/* ✅ UPDATED ADMIN BUTTON */}
+        {role === "ADMIN" && tournament && (
           <Button
             variant="contained"
             color="secondary"
             onClick={handleStart}
             sx={{ marginLeft: 2 }}
-            disabled={actionLoading}
+            disabled={actionLoading || tournament.status !== "UPCOMING"}
           >
-            {actionLoading ? "Starting..." : "Start Tournament"}
+            {tournament.status === "ONGOING"
+              ? "ONGOING"
+              : tournament.status === "COMPLETED"
+              ? "COMPLETED"
+              : actionLoading
+              ? "Starting..."
+              : "Start Tournament"}
           </Button>
         )}
       </div>
@@ -176,7 +186,8 @@ function TournamentDetail() {
                   {m.player2?.username || "BYE"}
                 </Typography>
 
-                {role === "ADMIN" && (
+                {/* ✅ ONLY SHOW DURING ONGOING */}
+                {role === "ADMIN" && tournament?.status === "ONGOING" && (
                   <>
                     {m.player1 && (
                       <Button

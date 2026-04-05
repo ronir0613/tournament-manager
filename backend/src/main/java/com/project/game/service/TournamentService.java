@@ -197,32 +197,44 @@ public class TournamentService {
         return leaderboard;
     }
 
-    public String updateMatchResult(Long matchId, Long winnerId) {
+   public String updateMatchResult(Long matchId, Long winnerId) {
 
-        Matches match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+    Matches match = matchRepository.findById(matchId)
+            .orElseThrow(() -> new RuntimeException("Match not found"));
 
-        if (match.getWinnerId() != null) {
-            return "Result already declared";
-        }
-
-        if (match.getPlayer1() == null && match.getPlayer2() == null) {
-            return "Invalid match";
-        }
-
-        if (match.getPlayer1() != null && match.getPlayer1().getId().equals(winnerId)) {
-            match.setWinnerId(winnerId);
-        } else if (match.getPlayer2() != null && match.getPlayer2().getId().equals(winnerId)) {
-            match.setWinnerId(winnerId);
-        } else {
-            return "Winner must be one of the players";
-        }
-
-        matchRepository.save(match);
-
-        return "Match result updated";
+    if (match.getWinnerId() != null) {
+        return "Result already declared";
     }
 
+    if (match.getPlayer1() == null && match.getPlayer2() == null) {
+        return "Invalid match";
+    }
+
+    if (match.getPlayer1() != null && match.getPlayer1().getId().equals(winnerId)) {
+        match.setWinnerId(winnerId);
+    } else if (match.getPlayer2() != null && match.getPlayer2().getId().equals(winnerId)) {
+        match.setWinnerId(winnerId);
+    } else {
+        return "Winner must be one of the players";
+    }
+
+    matchRepository.save(match);
+
+    // 🔥 NEW: AUTO COMPLETE LOGIC
+    Tournament tournament = match.getTournament();
+
+    List<Matches> allMatches = matchRepository.findByTournament(tournament);
+
+    boolean allCompleted = allMatches.stream()
+            .allMatch(m -> m.getWinnerId() != null);
+
+    if (allCompleted) {
+        tournament.setStatus(Tournament.Status.COMPLETED);
+        tournamentRepository.save(tournament);
+    }
+
+    return "Match result updated";
+}
     public List<Tournament> getAllTournaments() {
         return tournamentRepository.findAll();
     }
@@ -276,4 +288,10 @@ public class TournamentService {
 
         return "Tournament status updated";
     }
+
+    public Tournament getTournament(Long id) {
+        return tournamentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+    }
+    
 }
