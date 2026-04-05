@@ -206,10 +206,6 @@ public class TournamentService {
         return "Result already declared";
     }
 
-    if (match.getPlayer1() == null && match.getPlayer2() == null) {
-        return "Invalid match";
-    }
-
     if (match.getPlayer1() != null && match.getPlayer1().getId().equals(winnerId)) {
         match.setWinnerId(winnerId);
     } else if (match.getPlayer2() != null && match.getPlayer2().getId().equals(winnerId)) {
@@ -220,18 +216,66 @@ public class TournamentService {
 
     matchRepository.save(match);
 
-    // 🔥 NEW: AUTO COMPLETE LOGIC
     Tournament tournament = match.getTournament();
 
-    List<Matches> allMatches = matchRepository.findByTournament(tournament);
+    // 🔥 GET CURRENT ROUND MATCHES
+    int currentRound = match.getRound();
 
-    boolean allCompleted = allMatches.stream()
+    List<Matches> currentRoundMatches =
+            matchRepository.findByTournamentAndRound(tournament, currentRound);
+
+    // 🔥 CHECK IF ROUND COMPLETED
+    boolean roundCompleted = currentRoundMatches.stream()
             .allMatch(m -> m.getWinnerId() != null);
 
-    if (allCompleted) {
+    if (!roundCompleted) {
+        return "Match result updated";
+    }
+
+    // 🔥 GET WINNERS
+    List<User> winners = new ArrayList<>();
+
+    for (Matches m : currentRoundMatches) {
+        if (m.getPlayer1() != null && m.getPlayer1().getId().equals(m.getWinnerId())) {
+            winners.add(m.getPlayer1());
+        } else if (m.getPlayer2() != null && m.getPlayer2().getId().equals(m.getWinnerId())) {
+            winners.add(m.getPlayer2());
+        }
+    }
+
+    // 🔥 FINAL CASE
+    if (winners.size() == 1) {
         tournament.setStatus(Tournament.Status.COMPLETED);
         tournamentRepository.save(tournament);
+        return "Tournament completed";
     }
+
+    // 🔥 CREATE NEXT ROUND
+    List<Matches> nextRoundMatches = new ArrayList<>();
+    int nextRound = currentRound + 1;
+    int matchOrder = 1;
+
+    for (int i = 0; i < winners.size(); i += 2) {
+
+        Matches newMatch = new Matches();
+        newMatch.setTournament(tournament);
+        newMatch.setRound(nextRound);
+        newMatch.setMatchOrder(matchOrder++);
+
+        newMatch.setPlayer1(winners.get(i));
+
+        if (i + 1 < winners.size()) {
+            newMatch.setPlayer2(winners.get(i + 1));
+        } else {
+            // 🔥 BYE handling
+            newMatch.setPlayer2(null);
+            newMatch.setWinnerId(winners.get(i).getId());
+        }
+
+        nextRoundMatches.add(newMatch);
+    }
+
+    matchRepository.saveAll(nextRoundMatches);
 
     return "Match result updated";
 }
