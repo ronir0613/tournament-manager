@@ -6,6 +6,13 @@ import {
   startTournament,
   updateMatchResult,
 } from "../services/tournamentService";
+import {
+  Container,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+} from "@mui/material";
 
 function TournamentDetail() {
   const role = localStorage.getItem("role");
@@ -61,80 +68,96 @@ function TournamentDetail() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Tournament Details</h2>
+  <Container sx={{ marginTop: 4 }}>
+    <Typography variant="h4" align="center">
+      Tournament Details
+    </Typography>
 
-      {/* PLAYER ACTION */}
+    {/* ACTIONS */}
+    <div style={{ marginTop: "20px", textAlign: "center" }}>
       {role === "PLAYER" && (
-        <button onClick={handleRegister}>Register</button>
+        <Button variant="contained" onClick={handleRegister}>
+          Register
+        </Button>
       )}
 
-      {/* ADMIN ACTION */}
       {role === "ADMIN" && (
-        <button onClick={handleStart} style={{ marginLeft: "10px" }}>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleStart}
+          sx={{ marginLeft: 2 }}
+        >
           Start Tournament
-        </button>
-      )}
-
-      <h3>Bracket</h3>
-
-      {Object.keys(bracket).length === 0 ? (
-        <p>No matches yet</p>
-      ) : (
-        Object.entries(bracket).map(([round, matches]) => (
-          <div key={round}>
-            <h4>Round {round}</h4>
-
-            {matches.map((m) => (
-              <div key={m.id} style={{ marginBottom: "10px" }}>
-                <p>
-                  {m.player1?.username} vs {m.player2?.username || "BYE"}
-                </p>
-
-                {/* ADMIN RESULT BUTTONS */}
-                {role === "ADMIN" && (
-                  <>
-                    {m.player1 && (
-                      <button
-                        onClick={() =>
-                          handleResult(m.id, m.player1.id)
-                        }
-                      >
-                        {m.player1.username} wins
-                      </button>
-                    )}
-
-                    {m.player2 && (
-                      <button
-                        onClick={() =>
-                          handleResult(m.id, m.player2.id)
-                        }
-                        style={{ marginLeft: "10px" }}
-                      >
-                        {m.player2.username} wins
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        ))
-      )}
-
-      <h3>Leaderboard</h3>
-
-      {leaderboard.length === 0 ? (
-        <p>No results yet</p>
-      ) : (
-        leaderboard.map((l, index) => (
-          <p key={index}>
-            {l.username} - {l.wins} wins
-          </p>
-        ))
+        </Button>
       )}
     </div>
-  );
+
+    {/* BRACKET */}
+    <Typography variant="h5" sx={{ marginTop: 4 }}>
+      Bracket
+    </Typography>
+
+    {Object.entries(bracket).map(([round, matches]) => (
+      <div key={round}>
+        <Typography variant="h6">Round {round}</Typography>
+
+        {matches.map((m) => (
+          <Card key={m.id} sx={{ marginTop: 2 }}>
+            <CardContent>
+              <Typography>
+                {m.player1?.username} vs{" "}
+                {m.player2?.username || "BYE"}
+              </Typography>
+
+              {role === "ADMIN" && (
+                <>
+                  {m.player1 && (
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        handleResult(m.id, m.player1.id)
+                      }
+                    >
+                      {m.player1.username} wins
+                    </Button>
+                  )}
+
+                  {m.player2 && (
+                    <Button
+                      size="small"
+                      sx={{ marginLeft: 1 }}
+                      onClick={() =>
+                        handleResult(m.id, m.player2.id)
+                      }
+                    >
+                      {m.player2.username} wins
+                    </Button>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    ))}
+
+    {/* LEADERBOARD */}
+    <Typography variant="h5" sx={{ marginTop: 4 }}>
+      Leaderboard
+    </Typography>
+
+    {leaderboard.map((l, index) => (
+      <Card key={index} sx={{ marginTop: 2 }}>
+        <CardContent>
+          <Typography>
+            {l.username} - {l.wins} wins
+          </Typography>
+        </CardContent>
+      </Card>
+    ))}
+  </Container>
+);
 }
 
 export default TournamentDetail;
