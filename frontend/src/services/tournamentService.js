@@ -24,3 +24,8 @@ export const getMyMatches = async () => {
   const res = await API.get("/api/matches/my");
   return res.data;
 };
+
+export const createTournament = async (data) => {
+  const res = await API.post("/api/tournaments", data);
+  return res.data;
+};

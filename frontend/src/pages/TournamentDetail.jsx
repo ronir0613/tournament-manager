@@ -14,6 +14,9 @@ import {
   CardContent,
 } from "@mui/material";
 
+// 🔥 toast import
+import { toast } from "react-toastify";
+
 function TournamentDetail() {
   const { id } = useParams();
   const role = localStorage.getItem("role");
@@ -22,8 +25,17 @@ function TournamentDetail() {
   const [bracket, setBracket] = useState({});
   const [leaderboard, setLeaderboard] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // 🔥 NEW: action loading
+  const [actionLoading, setActionLoading] = useState(false);
+
   const fetchData = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const bracketRes = await API.get(`/api/tournaments/${id}/bracket`);
       const leaderboardRes = await API.get(`/api/tournaments/${id}/leaderboard`);
       const participantsRes = await API.get(`/api/tournaments/${id}/participants`);
@@ -34,7 +46,9 @@ function TournamentDetail() {
 
     } catch (err) {
       console.error(err);
-      alert("Failed to load tournament details");
+      setError("Failed to load tournament details");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,34 +57,63 @@ function TournamentDetail() {
   }, [id]);
 
   const handleRegister = async () => {
+    if (actionLoading) return;
+
     try {
+      setActionLoading(true);
+
       const res = await registerForTournament(id);
-      alert(res);
+      toast.success(res);
       fetchData();
+
     } catch {
-      alert("Registration failed");
+      toast.error("Registration failed");
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleStart = async () => {
+    if (actionLoading) return;
+
     try {
+      setActionLoading(true);
+
       const res = await startTournament(id);
-      alert(res);
+      toast.success(res);
       fetchData();
+
     } catch {
-      alert("Start failed");
+      toast.error("Start failed");
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleResult = async (matchId, winnerId) => {
+    if (actionLoading) return;
+
     try {
+      setActionLoading(true);
+
       const res = await updateMatchResult(matchId, winnerId);
-      alert(res);
+      toast.success(res);
       fetchData();
+
     } catch {
-      alert("Failed to update result");
+      toast.error("Failed to update result");
+    } finally {
+      setActionLoading(false);
     }
   };
+
+  if (loading) {
+    return <Typography align="center">Loading...</Typography>;
+  }
+
+  if (error) {
+    return <Typography color="error" align="center">{error}</Typography>;
+  }
 
   return (
     <Container sx={{ marginTop: 4 }}>
@@ -81,8 +124,12 @@ function TournamentDetail() {
       {/* ACTIONS */}
       <div style={{ marginTop: "20px", textAlign: "center" }}>
         {role === "PLAYER" && (
-          <Button variant="contained" onClick={handleRegister}>
-            Register
+          <Button
+            variant="contained"
+            onClick={handleRegister}
+            disabled={actionLoading}
+          >
+            {actionLoading ? "Processing..." : "Register"}
           </Button>
         )}
 
@@ -92,8 +139,9 @@ function TournamentDetail() {
             color="secondary"
             onClick={handleStart}
             sx={{ marginLeft: 2 }}
+            disabled={actionLoading}
           >
-            Start Tournament
+            {actionLoading ? "Starting..." : "Start Tournament"}
           </Button>
         )}
       </div>
@@ -133,6 +181,7 @@ function TournamentDetail() {
                     {m.player1 && (
                       <Button
                         size="small"
+                        disabled={actionLoading}
                         onClick={() =>
                           handleResult(m.id, m.player1.id)
                         }
@@ -145,6 +194,7 @@ function TournamentDetail() {
                       <Button
                         size="small"
                         sx={{ marginLeft: 1 }}
+                        disabled={actionLoading}
                         onClick={() =>
                           handleResult(m.id, m.player2.id)
                         }

@@ -13,7 +13,11 @@ import {
   TextField,
   Select,
   MenuItem,
+  Button,
 } from "@mui/material";
+
+// 🔥 toast
+import { toast } from "react-toastify";
 
 function Dashboard() {
   const [tournaments, setTournaments] = useState([]);
@@ -23,11 +27,18 @@ function Dashboard() {
   const [gameFilter, setGameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  // ✅ FIXED: moved inside
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const tournamentsData = await getTournaments();
         setTournaments(tournamentsData);
         setFiltered(tournamentsData);
@@ -37,7 +48,10 @@ function Dashboard() {
 
       } catch (err) {
         console.error(err);
-        alert("Failed to load data");
+        setError("Failed to load data");
+        toast.error("Failed to load data"); // ✅ added
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -61,8 +75,40 @@ function Dashboard() {
     setFiltered(data);
   };
 
+  // ✅ loading UI
+  if (loading) {
+    return <Typography align="center">Loading...</Typography>;
+  }
+
+  // ✅ error UI
+  if (error) {
+    return (
+      <Typography color="error" align="center">
+        {error}
+      </Typography>
+    );
+  }
+  const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  navigate("/");
+};
+
   return (
     <Container>
+<Button color="error" variant="contained" onClick={handleLogout}>
+  Logout
+</Button>
+      {/* 🔥 ADMIN BUTTON */}
+      {localStorage.getItem("role") === "ADMIN" && (
+        <Button
+          variant="contained"
+          sx={{ marginTop: 2 }}
+          onClick={() => navigate("/admin")}
+        >
+          Go to Admin Panel
+        </Button>
+      )}
 
       {/* 🔥 MY MATCHES */}
       <Typography variant="h5" sx={{ marginTop: 4 }}>
@@ -92,7 +138,6 @@ function Dashboard() {
       <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
         <TextField
           label="Filter by game"
-          variant="outlined"
           size="small"
           onChange={(e) => {
             setGameFilter(e.target.value);
