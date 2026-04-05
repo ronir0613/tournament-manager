@@ -260,4 +260,20 @@ public class TournamentService {
 
         return "Tournament deleted";
     }
+
+    public String updateTournamentStatus(Long id, String status) {
+
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        try {
+            tournament.setStatus(Tournament.Status.valueOf(status));
+        } catch (Exception e) {
+            return "Invalid status";
+        }
+
+        tournamentRepository.save(tournament);
+
+        return "Tournament status updated";
+    }
 }

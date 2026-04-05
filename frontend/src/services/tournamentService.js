@@ -34,3 +34,7 @@ export const deleteTournament = async (id) => {
   const res = await API.delete(`/api/tournaments/${id}`);
   return res.data;
 };
+export const updateTournamentStatus = async (id, status) => {
+  const res = await API.put(`/api/tournaments/${id}/status?status=${status}`);
+  return res.data;
+};

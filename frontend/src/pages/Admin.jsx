@@ -3,6 +3,7 @@ import {
   createTournament,
   getTournaments,
   deleteTournament,
+  updateTournamentStatus, // 🔥 added
 } from "../services/tournamentService";
 
 import {
@@ -12,6 +13,8 @@ import {
   Button,
   Card,
   CardContent,
+  Select,      // 🔥 added
+  MenuItem,    // 🔥 added
 } from "@mui/material";
 
 import { toast } from "react-toastify";
@@ -48,8 +51,6 @@ function Admin() {
     try {
       const res = await createTournament(data);
       toast.success(res);
-
-      // refresh list
       fetchTournaments();
     } catch {
       toast.error("Failed to create tournament");
@@ -60,11 +61,20 @@ function Admin() {
     try {
       const res = await deleteTournament(id);
       toast.success(res);
-
-      // refresh list
       fetchTournaments();
     } catch {
       toast.error("Delete failed");
+    }
+  };
+
+  // 🔥 NEW: status handler
+  const handleStatusChange = async (id, status) => {
+    try {
+      const res = await updateTournamentStatus(id, status);
+      toast.success(res);
+      fetchTournaments();
+    } catch {
+      toast.error("Status update failed");
     }
   };
 
@@ -72,7 +82,7 @@ function Admin() {
     <Container sx={{ marginTop: 4 }}>
       <Typography variant="h4">Admin Dashboard</Typography>
 
-      {/* 🔥 CREATE FORM */}
+      {/* CREATE FORM */}
       <TextField
         label="Tournament Name"
         fullWidth
@@ -105,7 +115,7 @@ function Admin() {
         Create Tournament
       </Button>
 
-      {/* 🔥 TOURNAMENT LIST */}
+      {/* TOURNAMENT LIST */}
       <Typography variant="h5" sx={{ marginTop: 5 }}>
         Manage Tournaments
       </Typography>
@@ -118,7 +128,20 @@ function Admin() {
             <CardContent>
               <Typography variant="h6">{t.name}</Typography>
               <Typography>Game: {t.game}</Typography>
-              <Typography>Status: {t.status}</Typography>
+
+              {/* 🔥 STATUS DROPDOWN */}
+              <Select
+                size="small"
+                value={t.status}
+                sx={{ marginTop: 2, marginRight: 2 }}
+                onChange={(e) =>
+                  handleStatusChange(t.id, e.target.value)
+                }
+              >
+                <MenuItem value="UPCOMING">UPCOMING</MenuItem>
+                <MenuItem value="ONGOING">ONGOING</MenuItem>
+                <MenuItem value="COMPLETED">COMPLETED</MenuItem>
+              </Select>
 
               <Button
                 variant="contained"
