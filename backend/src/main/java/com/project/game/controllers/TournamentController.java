@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.project.game.DTO.LeaderboardResponse;
 import com.project.game.DTO.TournamentRequest;
 import com.project.game.model.Matches;
+import com.project.game.model.Tournament;
 import com.project.game.model.User;
 import com.project.game.service.TournamentService;
 
@@ -45,4 +46,10 @@ public class TournamentController {
     public List<LeaderboardResponse> getLeaderboard(@PathVariable Long id) {
         return tournamentService.getLeaderboard(id);
     }
+
+    @GetMapping
+    public List<Tournament> getAllTournaments() {
+        return tournamentService.getAllTournaments();
+    }
+
 }

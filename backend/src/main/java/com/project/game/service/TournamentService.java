@@ -223,4 +223,8 @@ public class TournamentService {
 
         return "Match result updated";
     }
+
+    public List<Tournament> getAllTournaments() {
+        return tournamentRepository.findAll();
+    }
 }
