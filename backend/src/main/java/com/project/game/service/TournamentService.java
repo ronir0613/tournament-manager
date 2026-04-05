@@ -32,7 +32,6 @@ public class TournamentService {
         this.matchRepository = matchRepository;
     }
 
-    // ✅ CREATE TOURNAMENT (ADMIN)
     public String createTournament(TournamentRequest request) {
 
         User user = (User) SecurityContextHolder.getContext()
@@ -51,7 +50,6 @@ public class TournamentService {
         return "Tournament created successfully";
     }
 
-    // ✅ PLAYER REGISTRATION
     public String registerForTournament(Long tournamentId) {
 
         User user = (User) SecurityContextHolder.getContext()
@@ -85,7 +83,6 @@ public class TournamentService {
         return "Registered successfully";
     }
 
-    // 🔥 START TOURNAMENT + GENERATE MATCHES
     public String startTournament(Long tournamentId) {
 
         Tournament tournament = tournamentRepository.findById(tournamentId)
@@ -124,7 +121,6 @@ public class TournamentService {
             if (i + 1 < players.size()) {
                 match.setPlayer2(players.get(i + 1));
             } else {
-                // BYE case
                 match.setPlayer2(null);
                 match.setWinnerId(players.get(i).getId());
             }
@@ -195,6 +191,9 @@ public class TournamentService {
                     entry.getValue()));
         }
 
+        // 🔥 FIX: sort leaderboard
+        leaderboard.sort((a, b) -> b.getWins() - a.getWins());
+
         return leaderboard;
     }
 
@@ -242,5 +241,23 @@ public class TournamentService {
         }
 
         return users;
+    }
+
+    // 🔥 FIXED DELETE (IMPORTANT)
+    public String deleteTournament(Long id) {
+
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        // delete matches first
+        matchRepository.deleteAll(matchRepository.findByTournament(tournament));
+
+        // delete registrations
+        registrationRepository.deleteAll(registrationRepository.findByTournament(tournament));
+
+        // delete tournament
+        tournamentRepository.delete(tournament);
+
+        return "Tournament deleted";
     }
 }

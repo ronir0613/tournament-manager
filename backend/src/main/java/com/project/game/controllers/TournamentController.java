@@ -57,4 +57,9 @@ public class TournamentController {
         return tournamentService.getParticipants(id);
     }
 
+    @DeleteMapping("/{id}")
+    public String deleteTournament(@PathVariable Long id) {
+        return tournamentService.deleteTournament(id);
+    }
+
 }

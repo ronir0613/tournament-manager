@@ -29,3 +29,8 @@ export const createTournament = async (data) => {
   const res = await API.post("/api/tournaments", data);
   return res.data;
 };
+
+export const deleteTournament = async (id) => {
+  const res = await API.delete(`/api/tournaments/${id}`);
+  return res.data;
+};
