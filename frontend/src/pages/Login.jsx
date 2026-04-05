@@ -1,29 +1,29 @@
 import { useState } from "react";
 import { loginUser } from "../services/authService";
 import { useNavigate } from "react-router-dom";
-
+import { jwtDecode } from "jwt-decode";
 function Login() {
   const [data, setData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    try {
-      const token = await loginUser(data);
+  try {
+    const token = await loginUser(data);
 
-      localStorage.setItem("token", token);
+    localStorage.setItem("token", token);
 
-      // TEMP ROLE LOGIC
-      localStorage.setItem(
-        "role",
-        data.email.includes("admin") ? "ADMIN" : "PLAYER"
-      );
+    // Decode token
+    const decoded = jwtDecode(token);
 
-      navigate("/dashboard");
-    } catch (err) {
-      console.error(err);
-      alert("Login failed");
-    }
-  };
+    // Store real role
+    localStorage.setItem("role", decoded.role);
+
+    navigate("/dashboard");
+  } catch (err) {
+    console.error(err);
+    alert("Login failed");
+  }
+};
 
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>

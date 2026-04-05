@@ -52,4 +52,9 @@ public class TournamentController {
         return tournamentService.getAllTournaments();
     }
 
+    @GetMapping("/{id}/participants")
+    public List<User> getParticipants(@PathVariable Long id) {
+        return tournamentService.getParticipants(id);
+    }
+
 }

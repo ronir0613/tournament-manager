@@ -15,9 +15,10 @@ import {
 } from "@mui/material";
 
 function TournamentDetail() {
-  const role = localStorage.getItem("role");
   const { id } = useParams();
+  const role = localStorage.getItem("role");
 
+  const [participants, setParticipants] = useState([]);
   const [bracket, setBracket] = useState({});
   const [leaderboard, setLeaderboard] = useState([]);
 
@@ -25,9 +26,12 @@ function TournamentDetail() {
     try {
       const bracketRes = await API.get(`/api/tournaments/${id}/bracket`);
       const leaderboardRes = await API.get(`/api/tournaments/${id}/leaderboard`);
+      const participantsRes = await API.get(`/api/tournaments/${id}/participants`);
 
       setBracket(bracketRes.data);
       setLeaderboard(leaderboardRes.data);
+      setParticipants(participantsRes.data);
+
     } catch (err) {
       console.error(err);
       alert("Failed to load tournament details");
@@ -42,6 +46,7 @@ function TournamentDetail() {
     try {
       const res = await registerForTournament(id);
       alert(res);
+      fetchData();
     } catch {
       alert("Registration failed");
     }
@@ -68,96 +73,109 @@ function TournamentDetail() {
   };
 
   return (
-  <Container sx={{ marginTop: 4 }}>
-    <Typography variant="h4" align="center">
-      Tournament Details
-    </Typography>
+    <Container sx={{ marginTop: 4 }}>
+      <Typography variant="h4" align="center">
+        Tournament Details
+      </Typography>
 
-    {/* ACTIONS */}
-    <div style={{ marginTop: "20px", textAlign: "center" }}>
-      {role === "PLAYER" && (
-        <Button variant="contained" onClick={handleRegister}>
-          Register
-        </Button>
-      )}
+      {/* ACTIONS */}
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        {role === "PLAYER" && (
+          <Button variant="contained" onClick={handleRegister}>
+            Register
+          </Button>
+        )}
 
-      {role === "ADMIN" && (
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleStart}
-          sx={{ marginLeft: 2 }}
-        >
-          Start Tournament
-        </Button>
-      )}
-    </div>
-
-    {/* BRACKET */}
-    <Typography variant="h5" sx={{ marginTop: 4 }}>
-      Bracket
-    </Typography>
-
-    {Object.entries(bracket).map(([round, matches]) => (
-      <div key={round}>
-        <Typography variant="h6">Round {round}</Typography>
-
-        {matches.map((m) => (
-          <Card key={m.id} sx={{ marginTop: 2 }}>
-            <CardContent>
-              <Typography>
-                {m.player1?.username} vs{" "}
-                {m.player2?.username || "BYE"}
-              </Typography>
-
-              {role === "ADMIN" && (
-                <>
-                  {m.player1 && (
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        handleResult(m.id, m.player1.id)
-                      }
-                    >
-                      {m.player1.username} wins
-                    </Button>
-                  )}
-
-                  {m.player2 && (
-                    <Button
-                      size="small"
-                      sx={{ marginLeft: 1 }}
-                      onClick={() =>
-                        handleResult(m.id, m.player2.id)
-                      }
-                    >
-                      {m.player2.username} wins
-                    </Button>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+        {role === "ADMIN" && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleStart}
+            sx={{ marginLeft: 2 }}
+          >
+            Start Tournament
+          </Button>
+        )}
       </div>
-    ))}
 
-    {/* LEADERBOARD */}
-    <Typography variant="h5" sx={{ marginTop: 4 }}>
-      Leaderboard
-    </Typography>
+      {/* PARTICIPANTS */}
+      <Typography variant="h5" sx={{ marginTop: 4 }}>
+        Participants
+      </Typography>
 
-    {leaderboard.map((l, index) => (
-      <Card key={index} sx={{ marginTop: 2 }}>
-        <CardContent>
-          <Typography>
-            {l.username} - {l.wins} wins
-          </Typography>
-        </CardContent>
-      </Card>
-    ))}
-  </Container>
-);
+      {participants.length === 0 ? (
+        <Typography>No participants yet</Typography>
+      ) : (
+        participants.map((p) => (
+          <Typography key={p.id}>{p.username}</Typography>
+        ))
+      )}
+
+      {/* BRACKET */}
+      <Typography variant="h5" sx={{ marginTop: 4 }}>
+        Bracket
+      </Typography>
+
+      {Object.entries(bracket).map(([round, matches]) => (
+        <div key={round}>
+          <Typography variant="h6">Round {round}</Typography>
+
+          {matches.map((m) => (
+            <Card key={m.id} sx={{ marginTop: 2 }}>
+              <CardContent>
+                <Typography>
+                  {m.player1?.username} vs{" "}
+                  {m.player2?.username || "BYE"}
+                </Typography>
+
+                {role === "ADMIN" && (
+                  <>
+                    {m.player1 && (
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          handleResult(m.id, m.player1.id)
+                        }
+                      >
+                        {m.player1.username} wins
+                      </Button>
+                    )}
+
+                    {m.player2 && (
+                      <Button
+                        size="small"
+                        sx={{ marginLeft: 1 }}
+                        onClick={() =>
+                          handleResult(m.id, m.player2.id)
+                        }
+                      >
+                        {m.player2.username} wins
+                      </Button>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ))}
+
+      {/* LEADERBOARD */}
+      <Typography variant="h5" sx={{ marginTop: 4 }}>
+        Leaderboard
+      </Typography>
+
+      {leaderboard.map((l, index) => (
+        <Card key={index} sx={{ marginTop: 2 }}>
+          <CardContent>
+            <Typography>
+              {l.username} - {l.wins} wins
+            </Typography>
+          </CardContent>
+        </Card>
+      ))}
+    </Container>
+  );
 }
 
 export default TournamentDetail;

@@ -227,4 +227,20 @@ public class TournamentService {
     public List<Tournament> getAllTournaments() {
         return tournamentRepository.findAll();
     }
+
+    public List<User> getParticipants(Long tournamentId) {
+
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        List<TournamentRegistration> registrations = registrationRepository.findByTournament(tournament);
+
+        List<User> users = new ArrayList<>();
+
+        for (TournamentRegistration reg : registrations) {
+            users.add(reg.getUser());
+        }
+
+        return users;
+    }
 }

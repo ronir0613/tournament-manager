@@ -19,3 +19,8 @@ export const updateMatchResult = async (matchId, winnerId) => {
   const res = await API.put(`/api/matches/${matchId}/result?winnerId=${winnerId}`);
   return res.data;
 };
+
+export const getMyMatches = async () => {
+  const res = await API.get("/api/matches/my");
+  return res.data;
+};

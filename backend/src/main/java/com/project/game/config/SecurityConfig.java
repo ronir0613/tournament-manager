@@ -50,7 +50,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/tournaments/*/leaderboard").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/tournaments/**").authenticated()
                         .requestMatchers("/api/users").permitAll()
-
+                        .requestMatchers("/api/tournaments/*/participants").authenticated()
+                        .requestMatchers("/api/matches/my").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

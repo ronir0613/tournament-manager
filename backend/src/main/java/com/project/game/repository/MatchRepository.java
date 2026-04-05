@@ -9,4 +9,5 @@ public interface MatchRepository extends JpaRepository<Matches, Long> {
     List<Matches> findByTournament(Tournament tournament);
 
     List<Matches> findByTournamentAndRound(Tournament tournament, int round);
+    List<Matches> findByPlayer1OrPlayer2(User player1, User player2);
 }
