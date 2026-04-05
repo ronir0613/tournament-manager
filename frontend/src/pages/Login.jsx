@@ -12,6 +12,12 @@ function Login() {
 
       localStorage.setItem("token", token);
 
+      // TEMP ROLE LOGIC
+      localStorage.setItem(
+        "role",
+        data.email.includes("admin") ? "ADMIN" : "PLAYER"
+      );
+
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
