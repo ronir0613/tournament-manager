@@ -19,7 +19,6 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
-    // ✅ ADD THIS BACK
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -28,7 +27,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-
                 .cors(cors -> {
                 })
                 .csrf(csrf -> csrf.disable())
@@ -41,10 +39,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/tournaments/*/register").hasRole("PLAYER")
 
                         // Admin
-                        .requestMatchers("/api/tournaments/*/start").hasRole("ADMIN")
-                        .requestMatchers("/api/matches/*/result").hasRole("ADMIN")
+                        // 🔥 FIX: Added ** to allow query parameters like ?format=ROUND_ROBIN
+                        .requestMatchers("/api/tournaments/*/start**").hasRole("ADMIN")
+                        // 🔥 FIX: Added ** to allow query parameters like ?winnerId=0
+                        .requestMatchers("/api/matches/*/result**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/tournaments").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/tournaments/**").authenticated()
+                        
                         // Shared (authenticated users)
                         .requestMatchers("/api/tournaments/*/bracket").authenticated()
                         .requestMatchers("/api/tournaments/*/leaderboard").authenticated()
@@ -53,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/tournaments/*/participants").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/tournaments/*").hasRole("ADMIN")
                         .requestMatchers("/api/matches/my").authenticated()
+                        
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

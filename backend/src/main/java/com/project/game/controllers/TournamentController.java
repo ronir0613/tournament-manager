@@ -32,9 +32,12 @@ public class TournamentController {
         return tournamentService.registerForTournament(id);
     }
 
+    // 🔥 FIX: Added @RequestParam to accept the format choice from the frontend
     @PutMapping("/{id}/start")
-    public String startTournament(@PathVariable Long id) {
-        return tournamentService.startTournament(id);
+    public String startTournament(
+            @PathVariable Long id, 
+            @RequestParam(required = false, defaultValue = "ROUND_ROBIN") String format) {
+        return tournamentService.startTournament(id, format);
     }
 
     @GetMapping("/{id}/bracket")
@@ -72,6 +75,4 @@ public class TournamentController {
             @RequestParam String status) {
         return tournamentService.updateTournamentStatus(id, status);
     }
-    
-
 }

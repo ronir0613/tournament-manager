@@ -78,4 +78,16 @@ public class Matches {
     public void setMatchOrder(int matchOrder) {
         this.matchOrder = matchOrder;
     }
+    // Add this field
+    @Column(columnDefinition = "boolean default false")
+    private boolean completed = false;
+
+    // Add these getters and setters at the bottom of the file
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
 }

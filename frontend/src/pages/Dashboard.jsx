@@ -120,21 +120,40 @@ function Dashboard() {
       <Container sx={{ mt: 4 }}>
 
         {/* 🔥 MY MATCHES */}
-        <Typography variant="h5" sx={{ mb: 2, color: "#30364F" }}>
+        <Typography variant="h5" sx={{ mb: 2, color: "#30364F", fontWeight: "bold" }}>
           My Matches
         </Typography>
 
         {myMatches.length === 0 ? (
-          <Typography>No matches yet</Typography>
+          <Typography color="text.secondary">No matches yet</Typography>
         ) : (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
             {myMatches.map((m) => (
               <Card key={m.id} sx={styles.matchCard}>
                 <CardContent>
-                  <Typography>
-                    {m.player1?.username} vs{" "}
+                  <Typography variant="caption" sx={{ color: "#777", fontWeight: "bold" }}>
+                    Round {m.round}
+                  </Typography>
+                  
+                  <Typography sx={{ fontWeight: "bold", mt: 0.5, mb: 1 }}>
+                    {m.player1?.username} <span style={{ color: "#888" }}>vs</span>{" "}
                     {m.player2?.username || "BYE"}
                   </Typography>
+
+                  {/* Show the Match Status / Tie Logic */}
+                  {m.winnerId === null ? (
+                    <Typography variant="body2" sx={{ color: "#d97706", fontWeight: "bold" }}>
+                      Status: Pending
+                    </Typography>
+                  ) : m.winnerId === 0 ? (
+                    <Typography variant="body2" sx={{ color: "#2563eb", fontWeight: "bold" }}>
+                      Result: TIE
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: "#16a34a", fontWeight: "bold" }}>
+                      Completed
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -144,7 +163,7 @@ function Dashboard() {
         {/* 🔥 TOURNAMENTS */}
         <Typography
           variant="h4"
-          sx={{ mt: 5, mb: 2, textAlign: "center", color: "#30364F" }}
+          sx={{ mt: 5, mb: 2, textAlign: "center", color: "#30364F", fontWeight: "bold" }}
         >
           Tournaments
         </Typography>
@@ -152,8 +171,9 @@ function Dashboard() {
         {/* 🔥 FILTERS */}
         <Box sx={styles.filterBox}>
           <TextField
-            label="Game"
+            label="Game Search"
             size="small"
+            sx={{ backgroundColor: "white", borderRadius: 1 }}
             onChange={(e) => {
               setGameFilter(e.target.value);
               applyFilters(e.target.value, statusFilter);
@@ -164,21 +184,22 @@ function Dashboard() {
             value={statusFilter}
             size="small"
             displayEmpty
+            sx={{ backgroundColor: "white", borderRadius: 1, minWidth: 150 }}
             onChange={(e) => {
               setStatusFilter(e.target.value);
               applyFilters(gameFilter, e.target.value);
             }}
           >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="UPCOMING">UPCOMING</MenuItem>
-            <MenuItem value="ONGOING">ONGOING</MenuItem>
-            <MenuItem value="COMPLETED">COMPLETED</MenuItem>
+            <MenuItem value="">All Statuses</MenuItem>
+            <MenuItem value="UPCOMING">Upcoming</MenuItem>
+            <MenuItem value="ONGOING">Ongoing</MenuItem>
+            <MenuItem value="COMPLETED">Completed</MenuItem>
           </Select>
         </Box>
 
         {/* 🔥 TOURNAMENT LIST */}
         {filtered.length === 0 ? (
-          <Typography>No tournaments match filter</Typography>
+          <Typography color="text.secondary">No tournaments match your filters.</Typography>
         ) : (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
             {filtered.map((t) => (
@@ -188,9 +209,15 @@ function Dashboard() {
                 onClick={() => navigate(`/tournament/${t.id}`)}
               >
                 <CardContent>
-                  <Typography variant="h6">{t.name}</Typography>
-                  <Typography>Game: {t.game}</Typography>
-                  <Typography>Status: {t.status}</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: "bold", color: "#30364F", mb: 1 }}>
+                    {t.name}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    <strong>Game:</strong> {t.game}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Status:</strong> {t.status}
+                  </Typography>
                 </CardContent>
               </Card>
             ))}
@@ -206,11 +233,14 @@ const styles = {
     display: "flex",
     gap: "15px",
     marginBottom: "20px",
+    justifyContent: "center",
   },
 
   matchCard: {
-    minWidth: "200px",
+    minWidth: "220px",
     backgroundColor: "#E1D9BC",
+    borderRadius: "10px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
   },
 
   tournamentCard: {
@@ -218,9 +248,12 @@ const styles = {
     cursor: "pointer",
     transition: "0.3s",
     backgroundColor: "white",
+    borderRadius: "12px",
+    border: "1px solid #e0e0e0",
     "&:hover": {
-      transform: "scale(1.03)",
-      boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+      transform: "translateY(-4px)",
+      boxShadow: "0 12px 24px rgba(0,0,0,0.1)",
+      borderColor: "#30364F",
     },
   },
 };

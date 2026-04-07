@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   createTournament,
   getTournaments,
@@ -29,14 +30,20 @@ function Admin() {
   });
 
   const [tournaments, setTournaments] = useState([]);
+  const navigate = useNavigate();
 
   const role = localStorage.getItem("role");
 
-  if (role !== "ADMIN") {
-    return <Typography align="center">Access Denied</Typography>;
-  }
+  // 🔥 FIX: We use a .then() chain inside the useEffect. 
+  // Linters recognize this as safe, asynchronous data fetching.
+  useEffect(() => {
+    getTournaments()
+      .then((res) => setTournaments(res))
+      .catch(() => toast.error("Failed to load tournaments"));
+  }, []);
 
-  const fetchTournaments = async () => {
+  // 🔥 FIX: We keep a separate function for your buttons to use when they need to refresh the data.
+  const refreshTournaments = async () => {
     try {
       const res = await getTournaments();
       setTournaments(res);
@@ -45,16 +52,16 @@ function Admin() {
     }
   };
 
-  useEffect(() => {
-    fetchTournaments();
-  }, []);
+  if (role !== "ADMIN") {
+    return <Typography align="center">Access Denied</Typography>;
+  }
 
   const handleCreate = async () => {
     try {
       const res = await createTournament(data);
       toast.success(res);
       setData({ name: "", game: "", maxPlayers: "" });
-      fetchTournaments();
+      refreshTournaments(); // Calls the refresh function
     } catch {
       toast.error("Failed to create tournament");
     }
@@ -64,7 +71,7 @@ function Admin() {
     try {
       const res = await deleteTournament(id);
       toast.success(res);
-      fetchTournaments();
+      refreshTournaments();
     } catch {
       toast.error("Delete failed");
     }
@@ -74,7 +81,7 @@ function Admin() {
     try {
       const res = await updateTournamentStatus(id, status);
       toast.success(res);
-      fetchTournaments();
+      refreshTournaments();
     } catch {
       toast.error("Status update failed");
     }
@@ -169,6 +176,16 @@ function Admin() {
 
                       {/* RIGHT CONTROLS */}
                       <Box sx={styles.controls}>
+                        
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{ color: "#30364F", borderColor: "#30364F" }}
+                          onClick={() => navigate(`/tournament/${t.id}`)}
+                        >
+                          View
+                        </Button>
+
                         <Select
                           size="small"
                           value={t.status}
