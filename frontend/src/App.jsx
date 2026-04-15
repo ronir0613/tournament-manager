@@ -7,17 +7,20 @@ import Admin from "./pages/Admin";
 import { Navigate } from "react-router-dom";
 
 
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/" />;
+};
+
 function App() {
-    const token = localStorage.getItem("token");
-    const isAuthenticated = !!token;
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />} />
-        <Route path="/tournament/:id" element={<TournamentDetail />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/tournament/:id" element={<ProtectedRoute><TournamentDetail /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
